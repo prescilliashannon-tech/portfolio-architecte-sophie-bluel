@@ -6,12 +6,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap" rel="stylesheet">
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
 	<link rel="stylesheet" href="./assets/login.css">
 </head>
 <body>
+	<div id="edition-banner" class="hidden"> <!-- Bannière d'édition, visible uniquement en mode édition --> 
+    <p><i class="fa-regular fa-pen-to-square"></i> Mode édition</p>
+</div>
+
 <header>
 	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
 	<nav>
@@ -36,7 +41,13 @@
 		</article>
 	</section>
 	<section id="portfolio">
+		<div class="projects-header">
 		<h2>Mes Projets</h2>
+		<div id="edit-projects" class="hidden">
+    <i class="fa-regular fa-pen-to-square"></i> modifier
+</div>
+</div>
+
 		<div class="filters"></div>
 		<div class="gallery"></div>
 	</section>
@@ -62,6 +73,46 @@
 		</ul>
 	</nav>
 </footer>
+<!-- MODALE -->
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+
+        <!-- Bouton fermer -->
+        <span class="close-modal">&times;</span>
+
+        <!-- Vue Galerie -->
+        <div id="modal-gallery-view">
+            <h3>Galerie photo</h3>
+            <div id="modal-gallery"></div>
+            <button id="open-add-photo" class="btn">Ajouter une photo</button>
+        </div>
+
+        <!-- Vue Formulaire -->
+        <div id="modal-add-view" class="hidden">
+            <span class="back-arrow">&#8592;</span>
+            <h3>Ajout photo</h3>
+
+            <form  id="add-photo-form">
+            <div class="upload-zone">
+   	 		<i class="fa-regular fa-image"></i>
+
+    		<label for="photo-input" class="upload-btn">+ Ajouter photo</label>
+    		<input type="file" id="photo-input" accept="image/*">
+
+    		<p>jpg, png – 4mo max</p>
+			</div>
+
+
+                <input type="text" id="photo-title" placeholder="Titre">
+                <select id="photo-category"></select>
+
+                <button type="submit" class="btn">Valider</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
 <script src="./scripts/script.js"></script>
 </body>
 </html>

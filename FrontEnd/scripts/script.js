@@ -89,3 +89,68 @@ async function displayFilters() {
 }
 
 displayFilters();
+
+const token = localStorage.getItem("token");
+if (token) {
+    document.getElementById("edition-banner").classList.remove("hidden");
+}
+if (token) {
+    document.getElementById("edit-projects").classList.remove("hidden");
+}
+if (token) {
+    const loginLink = document.getElementById("login");
+
+    loginLink.textContent = "logout";
+    loginLink.href = "#";
+
+    loginLink.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.reload();
+    });
+}
+
+if (token) {
+    const filters = document.querySelector(".filters");
+    if (filters) {
+        filters.style.display = "none";
+    }
+}
+
+const modal = document.getElementById("modal");
+const editBtn = document.getElementById("edit-projects");
+const closeBtn = document.querySelector(".close-modal");
+const galleryView = document.getElementById("modal-gallery-view");
+const addView = document.getElementById("modal-add-view");
+const openAddBtn = document.getElementById("open-add-photo");
+const backArrow = document.querySelector(".back-arrow");
+
+// Ouvrir la modale
+editBtn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+    galleryView.classList.remove("hidden");
+    addView.classList.add("hidden");
+});
+
+// Fermer la modale
+closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+});
+
+// Fermer en cliquant en dehors
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+        modal.classList.add("hidden");
+    }
+});
+
+// Aller vers le formulaire
+openAddBtn.addEventListener("click", () => {
+    galleryView.classList.add("hidden");
+    addView.classList.remove("hidden");
+});
+
+// Retour à la galerie
+backArrow.addEventListener("click", () => {
+    addView.classList.add("hidden");
+    galleryView.classList.remove("hidden");
+});
