@@ -1,43 +1,55 @@
-//Ce code : contacte mon back-end, récupère les projets, les transforme en JSON // 
+document.addEventListener("DOMContentLoaded", () => {
+    // tout ton script ici
+});
 
-async function loadWorks() { 
+console.log("script.js chargé !");
+
+/******************************
+ * 1. CHARGEMENT DES TRAVAUX
+ ******************************/
+async function loadWorks() {
     const response = await fetch("http://localhost:5678/api/works");
-    const works = await response.json(); 
-    return works; //Retourne les projets sous forme de tableau d'objets//
+    return await response.json();
 }
 
-async function displayWorks(worksToDisplay) { //Affiche les projets dans la section portfolio//
+async function displayWorks(worksToDisplay) {
     const gallery = document.querySelector(".gallery");
     gallery.innerHTML = "";
 
-    // Si aucun tableau n'est fourni, on charge tous les travaux
     const works = worksToDisplay || await loadWorks();
 
-    works.forEach(work => { //Pour chaque projet, crée une figure avec une image et une légende//
-        const figure = document.createElement("figure"); 
+    works.forEach(work => {
+        const figure = document.createElement("figure");
 
-        const img = document.createElement("img"); //Crée une image et lui attribue l'URL et le titre du projet//
+        const img = document.createElement("img");
         img.src = work.imageUrl;
         img.alt = work.title;
 
-        const figcaption = document.createElement("figcaption"); //Crée une légende et lui attribue le titre du projet//
+        const figcaption = document.createElement("figcaption");
         figcaption.textContent = work.title;
 
-        figure.appendChild(img); //Ajoute l'image et la légende à la figure//
-        figure.appendChild(figcaption); //Ajoute la figure à la galerie//
+        figure.appendChild(img);
+        figure.appendChild(figcaption);
         gallery.appendChild(figure);
     });
 }
 
-displayWorks(); //Appelle la fonction pour afficher les projets dès que la page est chargée//
+displayWorks();
 
-async function loadCategories() { //Récupère les catégories depuis le back-end//
+
+/******************************
+ * 2. CHARGEMENT DES CATÉGORIES
+ ******************************/
+async function loadCategories() {
     const response = await fetch("http://localhost:5678/api/categories");
-    const categories = await response.json(); 
-    return categories; //Retourne les catégories sous forme de tableau d'objets//
-    
+    return await response.json();
 }
-async function displayFilters() { 
+
+
+/******************************
+ * 3. AFFICHAGE DES FILTRES
+ ******************************/
+async function displayFilters() {
     const categories = await loadCategories();
     const filtersContainer = document.querySelector(".filters");
     const works = await loadWorks();
@@ -50,22 +62,18 @@ async function displayFilters() {
     buttonAll.setAttribute("data-category-id", "0");
     filtersContainer.appendChild(buttonAll);
 
-    // Boutons des catégories
+    // Boutons catégories
     categories.forEach(category => {
         const button = document.createElement("button");
         button.textContent = category.name;
         button.classList.add("filter-btn");
         button.setAttribute("data-category-id", category.id);
         filtersContainer.appendChild(button);
-        
 
-        // EventListener pour chaque bouton de catégorie
         button.addEventListener("click", () => {
-            const categoryId = category.id;
-            const filteredWorks = works.filter(work => work.categoryId == categoryId);
+            const filteredWorks = works.filter(work => work.categoryId == category.id);
             gallery.innerHTML = "";
             setActiveButton(button);
-
 
             if (filteredWorks.length === 0) {
                 gallery.innerHTML = "<p>Aucun projet trouvé pour cette catégorie.</p>";
@@ -74,13 +82,15 @@ async function displayFilters() {
             }
         });
     });
+
     const allButtons = document.querySelectorAll(".filter-btn");
-        
+
     function setActiveButton(clickedButton) {
         allButtons.forEach(btn => btn.classList.remove("filter-btn-active"));
         clickedButton.classList.add("filter-btn-active");
-}
-// EventListener bouton "Tous"
+    }
+
+    // Bouton Tous
     buttonAll.addEventListener("click", () => {
         gallery.innerHTML = "";
         displayWorks(works);
@@ -90,32 +100,34 @@ async function displayFilters() {
 
 displayFilters();
 
+
+/******************************
+ * 4. MODE ÉDITION
+ ******************************/
 const token = localStorage.getItem("token");
+
 if (token) {
     document.getElementById("edition-banner").classList.remove("hidden");
-}
-if (token) {
     document.getElementById("edit-projects").classList.remove("hidden");
-}
-if (token) {
-    const loginLink = document.getElementById("login");
 
+    // Login → Logout
+    const loginLink = document.getElementById("login");
     loginLink.textContent = "logout";
     loginLink.href = "#";
-
     loginLink.addEventListener("click", () => {
         localStorage.removeItem("token");
         window.location.reload();
     });
-}
 
-if (token) {
+    // Cacher les filtres
     const filters = document.querySelector(".filters");
-    if (filters) {
-        filters.style.display = "none";
-    }
+    if (filters) filters.style.display = "none";
 }
 
+
+/******************************
+ * 5. MODALE
+ ******************************/
 const modal = document.getElementById("modal");
 const editBtn = document.getElementById("edit-projects");
 const closeBtn = document.querySelector(".close-modal");
@@ -124,33 +136,217 @@ const addView = document.getElementById("modal-add-view");
 const openAddBtn = document.getElementById("open-add-photo");
 const backArrow = document.querySelector(".back-arrow");
 
-// Ouvrir la modale
+// Ouvrir
 editBtn.addEventListener("click", () => {
     modal.classList.remove("hidden");
     galleryView.classList.remove("hidden");
     addView.classList.add("hidden");
+    loadModalGallery(); // fonction qui charge les images
 });
 
-// Fermer la modale
-closeBtn.addEventListener("click", () => {
-    modal.classList.add("hidden");
-});
+// Fermer
+closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
 
-// Fermer en cliquant en dehors
 modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-        modal.classList.add("hidden");
-    }
+    if (e.target === modal) modal.classList.add("hidden");
 });
 
-// Aller vers le formulaire
+// Aller au formulaire
 openAddBtn.addEventListener("click", () => {
     galleryView.classList.add("hidden");
     addView.classList.remove("hidden");
 });
 
-// Retour à la galerie
+// Retour galerie
 backArrow.addEventListener("click", () => {
     addView.classList.add("hidden");
     galleryView.classList.remove("hidden");
 });
+
+/******************************
+ * 7. FONCTION CHARGEMENT GALERIE DANS LA MODALE
+ ******************************/
+async function loadModalGallery() {
+    const response = await fetch("http://localhost:5678/api/works");
+    const works = await response.json();
+
+    const modalGallery = document.querySelector("#modal-gallery");
+    modalGallery.innerHTML = "";
+
+    works.forEach(work => {
+        const figure = document.createElement("figure");
+        const img = document.createElement("img");
+        img.src = work.imageUrl;
+        img.alt = work.title;
+
+        const deleteIcon = document.createElement("i");
+        deleteIcon.classList.add("fa-solid", "fa-trash-can");
+
+        deleteIcon.addEventListener("click", () => {
+        deleteWork(work.id, figure);
+    });
+
+        figure.appendChild(img);
+        figure.appendChild(deleteIcon);
+        modalGallery.appendChild(figure);
+    });
+}
+
+/******************************
+ * 7. REMPLIR LE SELECT CATÉGORIES (VERSION FINALE)
+ ******************************/
+async function fillCategorySelect() {
+    try {
+        const categories = await loadCategories();
+        const select = document.getElementById("photo-category");
+
+        select.innerHTML = ""; // éviter doublons
+
+        categories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat.id;
+            option.textContent = cat.name;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Erreur chargement catégories :", error);
+    }
+}
+
+fillCategorySelect();
+
+
+/******************************
+ * 8. PREVIEW IMAGE
+ ******************************/
+const photoInput = document.getElementById("photo-input");
+const uploadZone = document.querySelector(".upload-zone");
+
+photoInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.classList.add("preview-image");
+
+    uploadZone.innerHTML = "";
+    uploadZone.appendChild(img);
+});
+
+async function deleteWork(id, figureElement) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`http://localhost:5678/api/works/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (response.ok) {
+        figureElement.remove();
+        removeWorkFromMainGallery(id);
+    }
+}
+
+function removeWorkFromMainGallery(id) {
+    const gallery = document.querySelector(".gallery");
+    const figures = gallery.querySelectorAll("figure");
+
+    figures.forEach(fig => {
+        const img = fig.querySelector("img");
+        if (img && img.src.includes(`/works/${id}`)) {
+            fig.remove();
+        }
+    });
+}
+
+const form = document.getElementById("add-photo-form");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const image = photoInput.files[0];
+    const title = document.getElementById("photo-title").value.trim();
+    const category = document.getElementById("photo-category").value;
+
+    // Vérification
+    if (!image || !title || !category) {
+        alert("Merci de remplir tous les champs et d’ajouter une image.");
+        return;
+    }
+
+    // Si OK → on envoie
+    await sendNewWork(image, title, category);
+});
+async function sendNewWork(image, title, category) {
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("title", title);
+    formData.append("category", category);
+
+    const response = await fetch("http://localhost:5678/api/works", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+        body: formData
+    });
+
+    if (response.ok) {
+        const newWork = await response.json();
+
+        addWorkToMainGallery(newWork);
+        loadModalGallery();
+
+        form.reset();
+        uploadZone.innerHTML = `
+            <i class="fa-regular fa-image"></i>
+            <label for="photo-input" class="upload-btn">+ Ajouter photo</label>
+            <input type="file" id="photo-input" accept="image/*">
+            <p>jpg, png – 4mo max</p>
+        `;
+
+        addView.classList.add("hidden");
+        galleryView.classList.remove("hidden");
+
+    } else {
+        alert("Erreur lors de l’envoi du projet.");
+    }
+}
+function addWorkToMainGallery(work) {
+    const gallery = document.querySelector(".gallery");
+
+    const figure = document.createElement("figure");
+
+    const img = document.createElement("img");
+    img.src = work.imageUrl;
+    img.alt = work.title;
+
+    const figcaption = document.createElement("figcaption");
+    figcaption.textContent = work.title;
+
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    gallery.appendChild(figure);
+}
+function addWorkToMainGallery(work) {
+    const gallery = document.querySelector(".gallery");
+
+    const figure = document.createElement("figure");
+
+    const img = document.createElement("img");
+    img.src = work.imageUrl;
+    img.alt = work.title;
+
+    const figcaption = document.createElement("figcaption");
+    figcaption.textContent = work.title;
+
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    gallery.appendChild(figure);
+}
