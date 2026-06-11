@@ -41,6 +41,8 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
 	line-height: 1;
+    background-color: #FFFEF8;
+
 }
 ol, ul {
 	list-style: none;
@@ -201,7 +203,6 @@ li:hover {
 
 }
 #contact {
-	width: 30%;
 	margin: auto;
 }
 #contact > * {
@@ -253,6 +254,12 @@ footer nav ul {
 
 main, form {
     font-family: 'Work Sans', sans-serif;
+}
+
+/* Centrage du titre Login */
+#login-page-title {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 /* Formulaire */
@@ -315,18 +322,22 @@ form button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 9999;
 }
 
 .modal-content {
     background: #FFFFFF;
     padding: 40px 90px;
     position: relative;
-
+    overflow-y: auto; /* active la barre de défilement verticale si nécessaire */
+    width: 630px; /* largeur conforme à la maquette OC */
+    max-height: 90vh; /* limite la hauteur à 90% de la fenêtre */
+    overflow: hidden; /* empêche la modale de s’étirer */
+    border-radius: 10px;
 }
 
-.modal-content,
 #modal-add-view {
-  overflow: hidden; /* empêche le saut */
+  overflow: visible;
 }
 
 select {
@@ -346,6 +357,7 @@ select {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 15px;
+    padding: 20px;
 }
 
 #modal-gallery img {
@@ -353,6 +365,33 @@ select {
     height: 100px;
     object-fit: cover;
     position: relative;
+}
+
+#modal-gallery-view {
+  overflow-y: auto; /* active la barre de défilement verticale */
+  max-height: 50vh; /* espace disponible pour la galerie */
+  padding-right: 10px; /* évite que la scrollbar colle au bord */
+}
+
+#modal-gallery figure {
+  position: relative; /* permet de positionner les éléments enfants */
+}
+
+.fa-trash-can {
+  position: absolute;
+  top: 8px;      /* distance depuis le haut de l’image */
+  right: 8px;    /* distance depuis la droite */
+  color: white;  /* couleur de l’icône */
+  background-color: black; /* petit fond pour la lisibilité */
+  border-radius: 2px;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.fa-trash-can:hover {
+  background-color: #1D6154;
+  color: white;
 }
 
 .btn {
@@ -393,40 +432,12 @@ select {
     padding: 10px 20px;
     border-radius: 50px;
     font-size: 14px;
+    display: inline-block;
     cursor: pointer;
 }
 
 #photo-input {
     display: none;
-}
-
-#photo-category {
-    width: 100%;
-    height: 50px;
-    border: none;
-    padding: 8px 35px 8px 8px;
-    font-size: 14px;
-    font-family: 'Work Sans';
-    background-color: white;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%231D6154' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-    appearance: none;
-    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09); /* harmonise avec les inputs */
-}
-
-#photo-category:focus {
-    border: 1px solid #1D6154; /* couleur de focus conforme à Figma */
-    box-shadow: 0 0 0 2px rgba(29,97,84,0.2); /* halo doux interne */
-}
-
-#add-photo-form label {
-    font-family: 'Work Sans';
-    font-size: 14px;
-    margin-top: 15px;
-    margin-bottom: 5px;
-    display: block;
 }
 
 #photo-title {
@@ -437,6 +448,26 @@ select {
     font-family: 'Work Sans';
     box-shadow: 0px 4px 14px rgba(0,0,0,0.09); /* ajoute du relief */
     outline: none; /* empêche le saut */
+}
+
+#photo-category {
+    height: 40px;
+    border-radius: 5px;
+    padding: 6px;
+    font-size: 14px;
+    font-family: 'Work Sans';
+    box-shadow: 0px 4px 14px rgba(0,0,0,0.09);
+    border: none;
+    background-color: #fff;
+    outline: none;
+}
+
+.photo-title,
+.photo-category {
+    display: block;
+    margin: 20px 0 8px;
+    font-family: 'Work Sans';
+    font-size: 14px;
 }
 
 .upload-zone p {

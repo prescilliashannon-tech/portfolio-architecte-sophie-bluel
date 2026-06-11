@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // tout ton script ici
-});
 
 console.log("script.js chargé !");
 
@@ -20,6 +18,7 @@ async function displayWorks(worksToDisplay) {
 
     works.forEach(work => {
         const figure = document.createElement("figure");
+        figure.dataset.id = work.id; // indispensable
 
         const img = document.createElement("img");
         img.src = work.imageUrl;
@@ -58,8 +57,7 @@ async function displayFilters() {
     // Bouton "Tous"
     const buttonAll = document.createElement("button");
     buttonAll.textContent = "Tous";
-    buttonAll.classList.add("filter-btn");
-    buttonAll.setAttribute("data-category-id", "0");
+    buttonAll.classList.add("filter-btn", "filter-btn-active"); // actif par défaut
     filtersContainer.appendChild(buttonAll);
 
     // Boutons catégories
@@ -67,7 +65,7 @@ async function displayFilters() {
         const button = document.createElement("button");
         button.textContent = category.name;
         button.classList.add("filter-btn");
-        button.setAttribute("data-category-id", category.id);
+        button.dataset.categoryId = category.id;
         filtersContainer.appendChild(button);
 
         button.addEventListener("click", () => {
@@ -141,7 +139,7 @@ editBtn.addEventListener("click", () => {
     modal.classList.remove("hidden");
     galleryView.classList.remove("hidden");
     addView.classList.add("hidden");
-    loadModalGallery(); // fonction qui charge les images
+    loadModalGallery();
 });
 
 // Fermer
@@ -161,10 +159,22 @@ openAddBtn.addEventListener("click", () => {
 backArrow.addEventListener("click", () => {
     addView.classList.add("hidden");
     galleryView.classList.remove("hidden");
+
+    // 🔄 Réinitialiser la zone d’upload
+    uploadZone.innerHTML = `
+        <i class="fa-regular fa-image"></i>
+        <label for="photo-input" class="upload-btn">+ Ajouter photo</label>
+        <input type="file" id="photo-input" accept="image/*">
+        <p>jpg, png – 4mo max</p>
+    `;
+
+    // 🔄 Réinitialiser le champ file
+    photoInput.value = "";
 });
 
+
 /******************************
- * 7. FONCTION CHARGEMENT GALERIE DANS LA MODALE
+ * 6. GALERIE MODALE
  ******************************/
 async function loadModalGallery() {
     const response = await fetch("http://localhost:5678/api/works");
@@ -183,8 +193,8 @@ async function loadModalGallery() {
         deleteIcon.classList.add("fa-solid", "fa-trash-can");
 
         deleteIcon.addEventListener("click", () => {
-        deleteWork(work.id, figure);
-    });
+            deleteWork(work.id, figure);
+        });
 
         figure.appendChild(img);
         figure.appendChild(deleteIcon);
@@ -192,26 +202,22 @@ async function loadModalGallery() {
     });
 }
 
+
 /******************************
- * 7. REMPLIR LE SELECT CATÉGORIES (VERSION FINALE)
+ * 7. SELECT CATÉGORIES
  ******************************/
 async function fillCategorySelect() {
-    try {
-        const categories = await loadCategories();
-        const select = document.getElementById("photo-category");
+    const categories = await loadCategories();
+    const select = document.getElementById("photo-category");
 
-        select.innerHTML = ""; // éviter doublons
+    select.innerHTML = "";
 
-        categories.forEach(cat => {
-            const option = document.createElement("option");
-            option.value = cat.id;
-            option.textContent = cat.name;
-            select.appendChild(option);
-        });
-
-    } catch (error) {
-        console.error("Erreur chargement catégories :", error);
-    }
+    categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.id;
+        option.textContent = cat.name;
+        select.appendChild(option);
+    });
 }
 
 fillCategorySelect();
@@ -235,6 +241,10 @@ photoInput.addEventListener("change", function () {
     uploadZone.appendChild(img);
 });
 
+
+/******************************
+ * 9. SUPPRESSION
+ ******************************/
 async function deleteWork(id, figureElement) {
     const token = localStorage.getItem("token");
 
@@ -252,35 +262,31 @@ async function deleteWork(id, figureElement) {
 }
 
 function removeWorkFromMainGallery(id) {
-    const gallery = document.querySelector(".gallery");
-    const figures = gallery.querySelectorAll("figure");
-
-    figures.forEach(fig => {
-        const img = fig.querySelector("img");
-        if (img && img.src.includes(`/works/${id}`)) {
-            fig.remove();
-        }
-    });
+    const element = document.querySelector(`figure[data-id="${id}"]`);
+    if (element) element.remove();
 }
 
+
+/******************************
+ * 10. AJOUT DE PROJET
+ ******************************/
 const form = document.getElementById("add-photo-form");
 
 form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // empêche le rechargement
 
     const image = photoInput.files[0];
     const title = document.getElementById("photo-title").value.trim();
     const category = document.getElementById("photo-category").value;
 
-    // Vérification
     if (!image || !title || !category) {
         alert("Merci de remplir tous les champs et d’ajouter une image.");
         return;
     }
 
-    // Si OK → on envoie
     await sendNewWork(image, title, category);
 });
+
 async function sendNewWork(image, title, category) {
     const token = localStorage.getItem("token");
 
@@ -295,8 +301,10 @@ async function sendNewWork(image, title, category) {
             "Authorization": `Bearer ${token}`
         },
         body: formData
+    
     });
-
+    console.log("Réponse du serveur:", response);
+    
     if (response.ok) {
         const newWork = await response.json();
 
@@ -318,10 +326,12 @@ async function sendNewWork(image, title, category) {
         alert("Erreur lors de l’envoi du projet.");
     }
 }
+
 function addWorkToMainGallery(work) {
     const gallery = document.querySelector(".gallery");
 
     const figure = document.createElement("figure");
+    figure.dataset.id = work.id; // indispensable
 
     const img = document.createElement("img");
     img.src = work.imageUrl;
@@ -334,14 +344,14 @@ function addWorkToMainGallery(work) {
     figure.appendChild(figcaption);
     gallery.appendChild(figure);
 }
-function addWorkToMainGallery(work) {
-    const gallery = document.querySelector(".gallery");
+});
 
+function addWorkToDOM(work) {
+    const gallery = document.querySelector(".gallery");
     const figure = document.createElement("figure");
 
     const img = document.createElement("img");
     img.src = work.imageUrl;
-    img.alt = work.title;
 
     const figcaption = document.createElement("figcaption");
     figcaption.textContent = work.title;
@@ -349,4 +359,9 @@ function addWorkToMainGallery(work) {
     figure.appendChild(img);
     figure.appendChild(figcaption);
     gallery.appendChild(figure);
+}
+
+function removeWorkFromDOM(id) {
+    document.querySelector(`figure[data-id="${id}"]`)?.remove();
+    document.querySelector(`.modal-figure[data-id="${id}"]`)?.remove();
 }
